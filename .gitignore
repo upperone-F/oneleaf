@@ -1,0 +1,115 @@
+# ============================================================
+# Oneleaf · 跨平台 .gitignore (macOS + Windows + Linux/CI)
+# 目标：两机来回开发时，只同步「源码与配置」，不同步「机器产物」
+# ============================================================
+
+# ---------- Flutter / Dart / Pub ----------
+.dart_tool/
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+*.log
+.dart_tool/package_config.json
+
+# 覆盖率 / 测试产物
+coverage/
+.coverage/
+test/overall_coverage/
+
+# ---------- 生成代码（如需两机一致，建议「提交」而非忽略）----------
+# 默认不忽略 *.g.dart / *.freezed.dart —— 让 build_runner 产物进仓库，
+# 避免两台机器因生成时机不同产生差异。若团队约定「每次重新生成」，可取消注释：
+# *.g.dart
+# *.freezed.dart
+# *.config.dart
+
+# ---------- iOS / macOS ----------
+# 系统垃圾
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+*.swp
+
+# Xcode 用户态 & 派生数据
+DerivedData/
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+xcuserdata/
+*.xcuserstate
+**/*.xcodeproj/project.xcworkspace/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+
+# CocoaPods（Podfile.lock 要提交！）
+Pods/
+
+# 签名与私钥 —— 绝不入库
+*.p12
+*.cer
+*.mobileprovision
+*.key
+ios/Runner/GoogleService-Info.plist
+
+# ---------- Android ----------
+.gradle/
+android/.gradle/
+android/app/build/
+android/build/
+local.properties          # 含本机 SDK 路径，每台机器不同
+
+# 签名 —— 绝不入库（debug.keystore 例外，见下方说明）
+*.jks
+android/key.properties
+android/app/release.keystore
+android/app/upload-keystore.jks
+
+# ============================================================
+# 注意：Flutter 默认 debug.keystore 建议【提交】，否则两机 debug 签名
+# 不一致会导致「同版本互相覆盖安装失败」。默认文件在：
+#   android/app/debug.keystore （不要忽略它）
+# 正式 release 签名用 android/key.properties + 环境变量，绝不入库。
+# ============================================================
+
+# ---------- Windows ----------
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------- IDE / 编辑器 ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/launch.json.example
+!.vscode/settings.json.example
+*.swo
+
+# ---------- 密钥 / 环境 ----------
+.env
+.env.*
+!.env.example
+secrets.*
+*.pem
+
+# ---------- FVM（Flutter 版本管理）----------
+# 方案：SDK 本体不入库，版本配置文件入库（保证两机 Flutter 版本一致）
+.fvm/flutter_sdk/
+flutter_sdk/
+# 根目录 fvm_config.json 会被提交（FVM 推荐放这里）
+# 若你把配置放在 .fvm/fvm_config.json，请改用下面两行替代：
+# .fvm/*
+# !.fvm/fvm_config.json
+
+# ---------- 项目交付文档（可选：如需在仓库保留，删除下面几行）----------
+# 目前工程文档随仓库同步，故不忽略
