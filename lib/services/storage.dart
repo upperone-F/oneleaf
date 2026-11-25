@@ -55,4 +55,47 @@ class StorageService {
     }
     return false;
   }
+
+  /// 遍历所有已写的日记（日历 / 洞察页用）。
+  List<DiaryEntry> allFilled() {
+    final result = <DiaryEntry>[];
+    for (final key in _prefs.getKeys()) {
+      if (!key.startsWith(_kPrefix)) continue;
+      try {
+        final e = DiaryEntry.fromJson(
+            jsonDecode(_prefs.getString(key)!) as Map<String, dynamic>);
+        if (!e.isEmpty) result.add(e);
+      } catch (_) {}
+    }
+    result.sort((a, b) => b.date.compareTo(a.date));
+    return result;
+  }
+
+  // ---------- 通用 KV：保存 Buddy 订阅 / 自建角色 / 设置等轻量状态 ----------
+  static const _kState = 'state:';
+
+  Future<void> setStateJson(String key, Object value) =>
+      _prefs.setString('$_kState$key', jsonEncode(value));
+
+  Object? getStateJson(String key) {
+    final raw = _prefs.getString('$_kState$key');
+    if (raw == null) return null;
+    try {
+      return jsonDecode(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setStateList(String key, List<Map<String, dynamic>> value) =>
+      setStateJson(key, value);
+
+  List<Map<String, dynamic>> getStateList(String key) {
+    final raw = getStateJson(key);
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
 }

@@ -1,33 +1,42 @@
 # Oneleaf
 
-一个陪伴你的日记 App。**当前：Android MVP**——一个 Buddy（小叶）、一页日记、一段记得你的回应。
+一个陪伴你的日记 App。**当前：Android 全功能演示版**——11 个页面全部实现，功能以示例数据驱动，均可点击交互。
 
-## MVP 验证什么
+## 现在有什么（v0.2.0）
 
-> 当有人记得你说过的话、在意你的心情时，你会不会更愿意写下去？
+底部导航 5 个入口 + 6 个二级页面，**全部带示例数据、可交互**：
 
-MVP 只做三步闭环：**写下今天 + 选心情 → 小叶有温度地回应 → 下次打开它提起你前几天写过的事**。其余功能（天气/日历/语音/多 Buddy/市场/后端）一概暂缓。
+| # | 页面 | 位置 | 可以试的交互 |
+|---|------|------|------------|
+| 1 | 今日日记 | 底部「日记」 | **沉浸式全屏**：上部 1/3 封面（日期雕在图上、点「换封面」从图库更换）、中部横线纸写作（自动保存）、手势左右翻页。**主动陪伴**：Buddy 常驻封面右下角带呼吸动画，打开时主动提起前几天的事、写字停顿时轻声陪伴、写出「累/烦」等词立即关怀——主动的话可一键「收进日记」或划走。点 Buddy 头像或 `@Buddy` 让它回应，**回应以「@ 小叶：……」直接写进正文下一行**（和你写的话在同一段文本里，如「今天入职成功了 / @ 小叶：恭喜你啊…」），默认保留、像编辑文字一样选中即可删改。主动关怀「收进日记」同样写进正文。底栏可进语音/天气/洞察/分享 |
+| 2 | 日历 | 底部「日历」 | 切换月份、点日期看当天日记、状态标记（今天/已写） |
+| 3 | Buddy 对话 | 底部「对话」 | 切换 Buddy、发消息；发「记账」出记账卡、「画一张」出绘图卡、问「上次…」出记忆引用卡 |
+| 4 | Buddy 市场 | 底部「Buddy」 | 分类筛选、搜索、订阅/取消、看陪伴天数与默契度 |
+| 5 | 我的/设置 | 底部「我的」 | 主动关怀/长期记忆/情绪共鸣/应用锁等开关（即时生效） |
+| 6 | 陪伴手册 | 二级 | 默契进度、记忆抽屉、关怀开关、陪伴足迹 |
+| 7 | 创建 Buddy | 二级 | 三步向导（命名→人设→能力），完成后新 Buddy 自动进市场并订阅 |
+| 8 | 天气 | 二级 | 切城市、切今明、24h 趋势、5 天预报、Tina 提示 |
+| 9 | 语音 | 二级 | 点麦克风模拟识别转文字、写入日记、切标点/转录模式、TTS 朗读状态 |
+| 10 | 洞察 | 二级 | 情绪曲线、关键词云、统计卡、一键生成周报 |
+| 11 | 分享预览 | 二级 | 访客只读视角、访问计数、匿名设置、复制示例链接 |
 
-## 运行（需先装好 Flutter + Android SDK，见 docs/方案A-下载安装清单.md）
+> 这是**可交互的产品雏形**，不是完整功能版：数据是示例/本地演示，语音识别与 TTS 是状态模拟，LLM 可接真实接口。目的是让你完整走一遍产品体验、验证陪伴闭环。
+
+## 运行（环境已装好）
 
 ```bash
-# 首次：补齐 Android 平台原生文件 + 拉依赖 + 环境自检（只需一次）
-bash scripts/bootstrap.sh
-
-# 连上安卓机（开启 USB 调试），运行
+cd /Users/felixfang/Documents/GitHub/oneleaf
 flutter run
-
 # 或打 release 包
 flutter build apk --release
 ```
 
+> 本机 Flutter 在 `~/flutter/bin`，若 `flutter` 不在 PATH，先 `export PATH="$HOME/flutter/bin:$PATH"`。
+
 ## 两种模式
 
-**1. 演示模式（默认，无需任何配置）**
-不配 API Key 时自动进入。小叶用本地规则生成回应，仍会接住你的心情、提起前几天写过的事——完整闭环可体验。App 右上角会显示「演示模式」标记。
-
-**2. 真实 LLM 模式（推荐，回应更贴心）**
-用 OpenAI 兼容接口，启动时用 `--dart-define` 注入（Key 不写进源码、不入库）：
+- **演示模式（默认，无需配置）**：所有 Buddy 用本地规则即时回应，不发网络请求。日记、对话、订阅、设置等状态存在本机，重启后仍在。
+- **真实 LLM 模式**：用 OpenAI 兼容接口让回应更贴心：
 
 ```bash
 flutter run \
@@ -36,27 +45,41 @@ flutter run \
   --dart-define=LLM_MODEL=deepseek-chat
 ```
 
-- `LLM_BASE_URL`：兼容 OpenAI 的地址（OpenAI / DeepSeek / 通义 / Moonshot 等）
-- `LLM_API_KEY`：API Key
-- `LLM_MODEL`：模型名
-- 建议选**明确承诺不用于训练**的服务商——日记很私密。
-- 网络失败会自动降级回演示回应，闭环不会断。
+建议选**明确承诺不用于训练**的服务商——日记很私密。网络失败会自动降级回演示回应。
 
 ## 代码结构
 
 ```
 lib/
-├── main.dart                    入口
-├── config.dart                  运行配置（dart-define 注入，含演示模式判断）
+├── main.dart                    入口 + 底部导航主壳 + 二级页面路由表
+├── config.dart                  运行配置（dart-define 注入）
 ├── theme.dart                   极简清新配色
-├── models/diary.dart            日记模型 + 四档心情 + 日期工具
+├── models/
+│   ├── diary.dart               日记模型 + 四档心情 + 日期工具
+│   ├── buddy.dart                Buddy 模型 + 6 个内置示例角色
+│   └── chat.dart                对话消息模型
 ├── services/
-│   ├── storage.dart             本地存储（shared_preferences），含「记忆回流」取最近日记
-│   └── buddy.dart               Buddy 引擎：系统提示词 + LLM 调用 + 演示降级
-└── screens/journal_screen.dart  唯一页面：日记 + 心情 + 回应 + 翻页
+│   ├── storage.dart             本地存储（shared_preferences）+ 通用状态 KV
+│   └── buddy.dart               Buddy 引擎：系统提示词 + LLM + 多角色对话演示
+├── state/
+│   └── app_state.dart           全局共享状态（ChangeNotifier，零依赖）
+├── widgets/
+│   └── common.dart              通用组件（头像/卡片/开关行/空态等）
+└── screens/                     11 个页面
+    ├── journal_screen.dart      日记（核心闭环）
+    ├── chat_screen.dart         Buddy 对话
+    ├── calendar_screen.dart     日历
+    ├── market_screen.dart       Buddy 市场
+    ├── settings_screen.dart     我的/设置
+    ├── bond_screen.dart         陪伴手册
+    ├── create_buddy_screen.dart 创建 Buddy
+    ├── weather_screen.dart      天气
+    ├── voice_screen.dart        语音
+    ├── insights_screen.dart     洞察
+    └── share_screen.dart        分享预览
 ```
 
-设计取舍：MVP 用 `setState` + `shared_preferences`，依赖极少（只有 http / shared_preferences）。后期迁移 Riverpod / drift 时只需替换 services 层，UI 无感。
+设计取舍：零新增依赖（只 `http` / `shared_preferences`），自绘图表、emoji 头像、ChangeNotifier 状态管理，守住轻量原则。`flutter analyze` 无 error/warning，`flutter test` 全绿，`flutter build apk --debug` 成功。
 
 ## 相关文档
 
